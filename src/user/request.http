@@ -1,0 +1,18 @@
+### Signup a user
+POST http://localhost:8000/auth/signup
+Content-Type: application/json
+
+{
+    "email": "tokerto7001@gmail.com",
+    "password": "123456",
+    "name": "Hasan Toker"
+}
+
+### Signin a user
+POST http://localhost:8000/auth/signin
+Content-Type: application/json
+
+{
+    "email": "tokerto7001@gmail.com",
+    "password": "123456"
+}

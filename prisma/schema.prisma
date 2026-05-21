@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  email String @unique
+  name String
+  password String
+  refreshToken String?
+  createdAt DateTime @default(now())
+  role UserRole @default(USER)
+  workspaceUsers WorkspaceUsers[]
+  tasks Task[]
+  projectMembers ProjectMembers[]
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+model Workspace {
+  id Int @id @default(autoincrement())
+  name String @unique
+  createdAt DateTime @default(now())
+  workspaceUsers WorkspaceUsers[]
+  projects Project[]
+}
+
+model WorkspaceUsers {
+  user User @relation(fields: [userId], references: [id])
+  userId Int
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId Int
+  role WorkSpaceRole @default(MEMBER)
+  @@id([userId, workspaceId])
+}
+
+enum WorkSpaceRole {
+  MEMBER
+  ADMIN
+}
+
+model Project {
+  id Int @id @default(autoincrement())
+  name String @unique
+  createdAt DateTime @default(now())
+  description String?
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId Int
+  tasks Task[]
+  projectMembers ProjectMembers[]
+}
+
+model ProjectMembers {
+  user User @relation(fields: [userId], references: [id])
+  userId Int
+  project Project @relation(fields: [projectId], references: [id])
+  projectId Int
+  role WorkSpaceRole @default(MEMBER)
+  @@id([userId, projectId])
+}
+
+model Task {
+  id Int @id @default(autoincrement())
+  title String
+  description String?
+  status Status @default(TODO)
+  createdAt DateTime @default(now())
+  endDate DateTime?
+  assignee User? @relation(fields: [assigneeId], references: [id])
+  assigneeId Int?
+  project Project @relation(fields: [projectId], references: [id])
+  projectId Int
+}
+
+enum Status {
+  TODO
+  IN_PROGRESS
+  DONE
+}
