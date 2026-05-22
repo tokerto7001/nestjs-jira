@@ -4,7 +4,7 @@ import { SignupDto } from "./dtos/signup.dto";
 import { randomBytes, scrypt as _scrypt } from "crypto";
 import { promisify } from "util";
 import { SigninDto } from "./dtos/signin.dto";
-import { JwtService } from "@nestjs/jwt";
+import { JwtService, JwtSignOptions } from "@nestjs/jwt";
 
 const scrypt = promisify(_scrypt);
 
@@ -26,7 +26,7 @@ export class AuthService {
     const salt = randomBytes(8).toString('hex');
     const hash = await scrypt(signupAttr.password, salt, 32) as Buffer;
     const result = salt + '.' + hash.toString('hex');
-  
+
     await this.prismaService.user.create({
       data: {
         email: signupAttr.email,
@@ -42,33 +42,61 @@ export class AuthService {
         email: signinAttr.email
       }
     });
-    if(!user) throw new NotFoundException('User not found.');
+    if (!user) throw new NotFoundException('User not found.');
 
     const [salt, hash] = user.password.split('.');
     const hashToCompare = await scrypt(signinAttr.password, salt, 32) as Buffer;
-    if(hash !== hashToCompare.toString('hex')) throw new BadRequestException('Wrong email or password.');
+    if (hash !== hashToCompare.toString('hex')) throw new BadRequestException('Wrong email or password.');
 
-    const accessToken = await this.jwtService.signAsync(
-      { userId: user.id },
-      { 
-        secret: process.env.jwtAccessKey,
-        expiresIn: '15m',
-       },
-    );
+    const [
+      accessToken,
+      refreshToken,
+    ] = await Promise.all([
+      this.signToken(
+        user.id,
+        {
+          secret: process.env.jwtAccessKey,
+          expiresIn: '15m',
+        },),
+      this.signToken(
+        user.id,
+        {
+          secret: process.env.jwtRefreshKey,
+          expiresIn: '7d',
+        },),
+    ])
 
-    const refreshToken = await this.jwtService.signAsync(
-      { userId: user.id },
-      { 
-        secret: process.env.jwtRefreshKey,
-        expiresIn: '7d',
-       },
-    );
-    
-    await this.prismaService.user.update({ where: { email: signinAttr.email }, data: { refreshToken }});
+    // set the refresh token again
+    await this.prismaService.user.update({ where: { email: signinAttr.email }, data: { refreshToken } });
 
     return {
       accessToken,
       refreshToken,
     }
+  }
+
+  async refresh(userId: number) {
+    const newRefreshToken = await this.signToken(userId, {
+      secret: process.env.jwtRefreshKey,
+      expiresIn: '7d',
+    });
+    await this.prismaService.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        refreshToken: newRefreshToken,
+      }
+    });
+    return newRefreshToken;
+  }
+
+  private signToken(userId: number, signOptions: JwtSignOptions) {
+    return this.jwtService.signAsync(
+      {
+        userId,
+      },
+      signOptions
+    )
   }
 }
