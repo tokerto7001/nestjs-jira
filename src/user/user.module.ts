@@ -9,9 +9,8 @@ import { ConfigService } from '@nestjs/config';
   imports: [
     JwtModule.registerAsync({
       inject: [ConfigService],
-      useFactory: async(configService: ConfigService) => ({
-        global: true,
-      })
+      global: true,
+      useFactory: async(configService: ConfigService) => ({})
     })
   ],
   providers: [UserService, AuthService],

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Res, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res, Req, UseGuards, Patch } from '@nestjs/common';
 import { SignupDto } from './dtos/signup.dto';
 import { UserService } from './user.service';
 import { AuthService } from './auth.service';
@@ -6,6 +6,7 @@ import { SigninDto } from './dtos/signin.dto';
 import type { CookieOptions, Request, Response } from 'express';
 import { RefreshTokenGuard } from 'src/guards/refreshtoken.guard';
 import { AuthGuard } from 'src/guards/auth.guard';
+import { UpdatePasswordDto } from './dtos/update-password.dto';
 
 const cookieOptions: CookieOptions = {
   httpOnly: true,
@@ -47,5 +48,11 @@ export class UserController {
   @UseGuards(AuthGuard)
   getMe(@Req() request: Request) {
     return request.user;
+  }
+
+  @Patch('/password')
+  @UseGuards(AuthGuard)
+  updatePassword(@Req() request: Request, @Body() body: UpdatePasswordDto) {
+    return this.authService.updatePassword(request.user.id, body.password, body.newPassword);
   }
 }

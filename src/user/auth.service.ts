@@ -23,14 +23,12 @@ export class AuthService {
     });
     if (exists) throw new BadRequestException('User already exists.');
 
-    const salt = randomBytes(8).toString('hex');
-    const hash = await scrypt(signupAttr.password, salt, 32) as Buffer;
-    const result = salt + '.' + hash.toString('hex');
+    const passwordHash = await this.createPasswordHash(signupAttr.password);
 
     await this.prismaService.user.create({
       data: {
         email: signupAttr.email,
-        password: result,
+        password: passwordHash,
         name: signupAttr.name
       }
     });
@@ -44,9 +42,7 @@ export class AuthService {
     });
     if (!user) throw new NotFoundException('User not found.');
 
-    const [salt, hash] = user.password.split('.');
-    const hashToCompare = await scrypt(signinAttr.password, salt, 32) as Buffer;
-    if (hash !== hashToCompare.toString('hex')) throw new BadRequestException('Wrong email or password.');
+    await this.comparePasswords(signinAttr.password, user.password);
 
     const [
       accessToken,
@@ -91,6 +87,13 @@ export class AuthService {
     return newRefreshToken;
   }
 
+  async updatePassword(userId: number, oldPassword: string, newPassword: string) {
+    const user = await this.prismaService.user.findFirst({ where: { id: userId } });
+    await this.comparePasswords(oldPassword, user!.password);
+    const newPasswordHash = await this.createPasswordHash(newPassword);
+    await this.prismaService.user.update({ where: { id: userId }, data: { password: newPasswordHash } });
+  }
+
   private signToken(userId: number, signOptions: JwtSignOptions) {
     return this.jwtService.signAsync(
       {
@@ -98,5 +101,17 @@ export class AuthService {
       },
       signOptions
     )
+  }
+
+  private async createPasswordHash(password: string) {
+    const salt = randomBytes(8).toString('hex');
+    const hash = await scrypt(password, salt, 32) as Buffer;
+    return salt + '.' + hash.toString('hex');
+  }
+
+  private async comparePasswords(password: string, hashedPassword: string) {
+    const [salt, hash] = hashedPassword.split('.');
+    const hashToCompare = await scrypt(password, salt, 32) as Buffer;
+    if (hash !== hashToCompare.toString('hex')) throw new BadRequestException('Wrong password.');
   }
 }
