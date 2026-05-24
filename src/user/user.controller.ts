@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Res, Req, UseGuards, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res, Req, UseGuards, Patch, HttpCode, InternalServerErrorException } from '@nestjs/common';
 import { SignupDto } from './dtos/signup.dto';
 import { UserService } from './user.service';
 import { AuthService } from './auth.service';
@@ -27,6 +27,7 @@ export class UserController {
   }
 
   @Post('/signin')
+  @HttpCode(200)
   async signin(@Body() body: SigninDto, @Res({ passthrough: true }) response: Response) {
     const {
       accessToken,
