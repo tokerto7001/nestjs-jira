@@ -46,6 +46,22 @@ export class WorkspaceService {
     });
   }
 
+  getMembers(id: number) {
+    return this.prismaService.workspaceUsers.findMany({
+      where: {
+        workspaceId: id,
+      },
+      include: {
+        user: {
+          select: {
+            email: true,
+            name: true,
+          }
+        }
+      }
+    })
+  }
+
   // TODO: add other models in the transaction after implementing all related logic
   delete(id: number) {
     const deleteWorkspaceUsers = this.prismaService.workspaceUsers.deleteMany({

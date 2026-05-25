@@ -47,6 +47,12 @@ export class WorkspaceController {
     return this.workspaceService.get(+id);
   }
 
+  @Get('/:id/members')
+  @UseGuards(AuthGuard, WorkspaceAdminGuard)
+  getMembers(@Param('id') id: string) {
+    return this.workspaceService.getMembers(+id);
+  }
+
   @Delete('/:id')
   @UseGuards(AuthGuard, WorkspaceAdminGuard)
   delete(@Param('id') id: string) {
