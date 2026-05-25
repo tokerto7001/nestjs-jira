@@ -8,6 +8,8 @@ import { UpdateWorkspaceDto } from './dtos/update-workspace.dto';
 import { WorkspaceAdminGuard } from './guards/workspace-admin.guard';
 import { GetWorkspaceDto } from './dtos/get-workspace.dto';
 import { WorkspaceMemberGuard } from './guards/workspace-member.guard';
+import { MemberOperationDto } from './dtos/member-operation.dto';
+import { UpdateRoleDto } from './dtos/update-role.dto';
 
 @Controller('workspace')
 export class WorkspaceController {
@@ -49,6 +51,30 @@ export class WorkspaceController {
   @UseGuards(AuthGuard, WorkspaceAdminGuard)
   delete(@Param('id') id: string) {
     return this.workspaceService.delete(+id);
+  }
+
+  @Post('/:id/members')
+  @UseGuards(AuthGuard, WorkspaceAdminGuard)
+  addUserToWorkspace(@Param('id') id: string, @Body() { userId }: MemberOperationDto) {
+    return this.workspaceService.addToWorkspace(+id, userId);
+  }
+
+  @Delete('/:id/members')
+  @UseGuards(AuthGuard, WorkspaceAdminGuard)
+  removeUserFromWorkspace(@Param('id') id: string, @Body() { userId }: MemberOperationDto) {
+    return this.workspaceService.removeFromWorkspace(+id, userId);
+  }
+
+  @Delete('/:id/my')
+  @UseGuards(AuthGuard, WorkspaceMemberGuard)
+  exitFromWorkspace(@Param('id') id: string, @Req() { user }: Request) {
+    return this.workspaceService.exitFromWorkspace(+id, user.id);
+  }
+
+  @Patch('/:id/members/role')
+  @UseGuards(AuthGuard, WorkspaceAdminGuard)
+  updateMemberRole(@Param('id') id: string, @Body() { userId, role }: UpdateRoleDto) {
+    return this.workspaceService.updateMemberRole(+id, userId, role);
   }
 
 }
