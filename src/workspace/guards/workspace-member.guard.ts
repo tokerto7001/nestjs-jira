@@ -11,10 +11,10 @@ export class WorkspaceMemberGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext) {
     const request: Request = context.switchToHttp().getRequest();
-    if(request.user.role === UserRole.ADMIN) return true; // system admin can proceed
-
     const workspaceId = Number(request.params.id);
     if(isNaN(workspaceId)) throw new ForbiddenException();
+
+    if(request.user.role === UserRole.ADMIN) return true; // system admin can proceed
 
     const isWorkspaceMember = await this.prismaService.workspaceUsers.findFirst({
       where: {

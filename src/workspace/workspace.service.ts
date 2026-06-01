@@ -19,7 +19,7 @@ export class WorkspaceService {
     })
   }
 
-  async update(workspaceId: number, newName: string) {
+  update(workspaceId: number, newName: string) {
     return this.prismaService.workspace.update(
       {
         where: { id: workspaceId },

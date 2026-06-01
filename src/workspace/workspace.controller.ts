@@ -5,7 +5,7 @@ import { AdminGuard } from 'src/guards/admin.guard';
 import { CreateWorkspaceDto } from './dtos/create-workspace.dto';
 import type { Request } from 'express';
 import { UpdateWorkspaceDto } from './dtos/update-workspace.dto';
-import { WorkspaceAdminGuard } from './guards/workspace-admin.guard';
+import { WorkspaceAdminGuard } from '../guards/workspace-admin.guard';
 import { GetWorkspaceDto } from './dtos/get-workspace.dto';
 import { WorkspaceMemberGuard } from './guards/workspace-member.guard';
 import { MemberOperationDto } from './dtos/member-operation.dto';
