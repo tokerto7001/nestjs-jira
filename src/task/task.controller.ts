@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { ProjectMemberGuard } from 'src/guards/project-member.guard';
@@ -14,37 +14,37 @@ export class TaskController {
 
   @Post()
   @UseGuards(AuthGuard, ProjectMemberGuard)
-  create(@Param('projectId') projectId: string, @Body() body: CreateTaskDto) {
-    return this.taskService.create(+projectId, body);
+  create(@Param('projectId', ParseIntPipe) projectId: number, @Body() body: CreateTaskDto) {
+    return this.taskService.create(projectId, body);
   }
 
   @Get()
   @UseGuards(AuthGuard, ProjectMemberGuard)
-  getTasks(@Param('projectId') projectId: string, @Query() {limit, offset}: GetTasksDto) {
-    return this.taskService.getTasks(+projectId, limit, offset);
+  getTasks(@Param('projectId', ParseIntPipe) projectId: number, @Query() {limit, offset}: GetTasksDto) {
+    return this.taskService.getTasks(projectId, limit, offset);
   }
 
   @Get('/my')
   @UseGuards(AuthGuard, ProjectMemberGuard)
-  getMyTasks(@Param('projectId') projectId: string, @Req() request: Request, @Query() {limit, offset}: GetTasksDto ) {
-    return this.taskService.getMyTasks(+projectId, request.user.id, limit, offset);
+  getMyTasks(@Param('projectId', ParseIntPipe) projectId: number, @Req() request: Request, @Query() {limit, offset}: GetTasksDto ) {
+    return this.taskService.getMyTasks(projectId, request.user.id, limit, offset);
   }
 
   @Get('/:taskId')
   @UseGuards(AuthGuard, ProjectMemberGuard)
-  getTask(@Param('projectId') projectId: string, @Param('taskId') taskId: string) {
-    return this.taskService.getTask(+projectId, +taskId);
+  getTask(@Param('projectId', ParseIntPipe) projectId: number, @Param('taskId', ParseIntPipe) taskId: number) {
+    return this.taskService.getTask(projectId, taskId);
   }
 
   @Delete('/:taskId')
   @UseGuards(AuthGuard, ProjectAdminGuard)
-  delete(@Param('projectId') projectId: string, @Param('taskId') taskId: string) {
-    return this.taskService.delete(+projectId, +taskId);
+  delete(@Param('projectId', ParseIntPipe) projectId: number, @Param('taskId', ParseIntPipe) taskId: number) {
+    return this.taskService.delete(projectId, taskId);
   }
 
   @Patch('/:taskId')
   @UseGuards(AuthGuard, ProjectMemberGuard)
-  update(@Param('projectId') projectId: string, @Param('taskId') taskId: string, @Body() body: UpdateTaskDto) {
-    return this.taskService.update(+projectId, +taskId, body);
+  update(@Param('projectId', ParseIntPipe) projectId: number, @Param('taskId', ParseIntPipe) taskId: number, @Body() body: UpdateTaskDto) {
+    return this.taskService.update(projectId, taskId, body);
   }
 }

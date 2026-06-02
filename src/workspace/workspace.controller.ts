@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { WorkspaceService } from './workspace.service';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { AdminGuard } from 'src/guards/admin.guard';
@@ -25,8 +25,8 @@ export class WorkspaceController {
 
   @Patch('/:id')
   @UseGuards(AuthGuard, WorkspaceAdminGuard)
-  update(@Param('id') id: string, @Body() { name }: UpdateWorkspaceDto) {
-    return this.workspaceService.update(+id, name);
+  update(@Param('id', ParseIntPipe) id: number, @Body() { name }: UpdateWorkspaceDto) {
+    return this.workspaceService.update(id, name);
   }
 
   @Get()
@@ -43,44 +43,44 @@ export class WorkspaceController {
 
   @Get('/:id')
   @UseGuards(AuthGuard, WorkspaceMemberGuard)
-  getWorkspace(@Param('id') id: string) {
-    return this.workspaceService.get(+id);
+  getWorkspace(@Param('id', ParseIntPipe) id: number) {
+    return this.workspaceService.get(id);
   }
 
   @Get('/:id/members')
   @UseGuards(AuthGuard, WorkspaceAdminGuard)
-  getMembers(@Param('id') id: string) {
-    return this.workspaceService.getMembers(+id);
+  getMembers(@Param('id', ParseIntPipe) id: number) {
+    return this.workspaceService.getMembers(id);
   }
 
   @Delete('/:id')
   @UseGuards(AuthGuard, WorkspaceAdminGuard)
-  delete(@Param('id') id: string) {
-    return this.workspaceService.delete(+id);
+  delete(@Param('id', ParseIntPipe) id: number) {
+    return this.workspaceService.delete(id);
   }
 
   @Post('/:id/members')
   @UseGuards(AuthGuard, WorkspaceAdminGuard)
-  addUserToWorkspace(@Param('id') id: string, @Body() { userId }: MemberOperationDto) {
-    return this.workspaceService.addToWorkspace(+id, userId);
+  addUserToWorkspace(@Param('id', ParseIntPipe) id: number, @Body() { userId }: MemberOperationDto) {
+    return this.workspaceService.addToWorkspace(id, userId);
   }
 
   @Delete('/:id/members')
   @UseGuards(AuthGuard, WorkspaceAdminGuard)
-  removeUserFromWorkspace(@Param('id') id: string, @Body() { userId }: MemberOperationDto) {
-    return this.workspaceService.removeFromWorkspace(+id, userId);
+  removeUserFromWorkspace(@Param('id', ParseIntPipe) id: number, @Body() { userId }: MemberOperationDto) {
+    return this.workspaceService.removeFromWorkspace(id, userId);
   }
 
   @Delete('/:id/my')
   @UseGuards(AuthGuard, WorkspaceMemberGuard)
-  exitFromWorkspace(@Param('id') id: string, @Req() { user }: Request) {
-    return this.workspaceService.exitFromWorkspace(+id, user.id);
+  exitFromWorkspace(@Param('id', ParseIntPipe) id: number, @Req() { user }: Request) {
+    return this.workspaceService.exitFromWorkspace(id, user.id);
   }
 
   @Patch('/:id/members/role')
   @UseGuards(AuthGuard, WorkspaceAdminGuard)
-  updateMemberRole(@Param('id') id: string, @Body() { userId, role }: UpdateRoleDto) {
-    return this.workspaceService.updateMemberRole(+id, userId, role);
+  updateMemberRole(@Param('id', ParseIntPipe) id: number, @Body() { userId, role }: UpdateRoleDto) {
+    return this.workspaceService.updateMemberRole(id, userId, role);
   }
 
 }
