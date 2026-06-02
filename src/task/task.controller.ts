@@ -1,9 +1,12 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { ProjectMemberGuard } from 'src/guards/project-member.guard';
 import { CreateTaskDto } from './dtos/create-task.dto';
 import { GetTasksDto } from './dtos/get-tasks.dto';
+import type { Request } from 'express';
+import { ProjectAdminGuard } from 'src/guards/project-admin.guard';
+import { UpdateTaskDto } from './dtos/update-task.dto';
 
 @Controller('/workspace/:workspaceId/project/:projectId/task')
 export class TaskController {
@@ -21,9 +24,27 @@ export class TaskController {
     return this.taskService.getTasks(+projectId, limit, offset);
   }
 
+  @Get('/my')
+  @UseGuards(AuthGuard, ProjectMemberGuard)
+  getMyTasks(@Param('projectId') projectId: string, @Req() request: Request, @Query() {limit, offset}: GetTasksDto ) {
+    return this.taskService.getMyTasks(+projectId, request.user.id, limit, offset);
+  }
+
   @Get('/:taskId')
   @UseGuards(AuthGuard, ProjectMemberGuard)
   getTask(@Param('projectId') projectId: string, @Param('taskId') taskId: string) {
     return this.taskService.getTask(+projectId, +taskId);
+  }
+
+  @Delete('/:taskId')
+  @UseGuards(AuthGuard, ProjectAdminGuard)
+  delete(@Param('projectId') projectId: string, @Param('taskId') taskId: string) {
+    return this.taskService.delete(+projectId, +taskId);
+  }
+
+  @Patch('/:taskId')
+  @UseGuards(AuthGuard, ProjectMemberGuard)
+  update(@Param('projectId') projectId: string, @Param('taskId') taskId: string, @Body() body: UpdateTaskDto) {
+    return this.taskService.update(+projectId, +taskId, body);
   }
 }

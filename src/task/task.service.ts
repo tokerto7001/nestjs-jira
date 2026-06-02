@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { CreateTaskDto } from './dtos/create-task.dto';
+import { UpdateTaskDto } from './dtos/update-task.dto';
 
 @Injectable()
 export class TaskService {
@@ -60,6 +61,47 @@ export class TaskService {
           }
         }
       }
+    })
+  }
+
+  getMyTasks(projectId: number, userId: number, limit: number = 10, offset: number = 0) {
+    return this.prismaService.task.findMany({
+      where: {
+        projectId,
+        assigneeId: userId,
+      }
+    })
+  }
+
+  delete(projectId: number, taskId: number) {
+    return this.prismaService.task.delete({
+      where: {
+        id: taskId,
+        projectId,
+      }
+    })
+  }
+
+  async update(projectId: number, taskId: number, taskAttr: UpdateTaskDto) {
+    if(taskAttr.assigneeId) {
+      const isMember = await this.prismaService.projectMembers.findFirst({
+        where: {
+          userId: taskAttr.assigneeId,
+          projectId,
+        }
+      });
+      if(!isMember) throw new BadRequestException('User is not a member of the project');
+    }
+
+    return this.prismaService.task.update({
+      where: {
+        projectId,
+        id: taskId
+      },
+      data: taskAttr
+    }).catch((err) => {
+      if(err.code === 'P2003') throw new NotFoundException('user not found');
+      throw err;
     })
   }
 }
