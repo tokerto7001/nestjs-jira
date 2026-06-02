@@ -69,7 +69,9 @@ export class TaskService {
       where: {
         projectId,
         assigneeId: userId,
-      }
+      },
+      take: limit,
+      skip: offset,
     })
   }
 
@@ -79,6 +81,9 @@ export class TaskService {
         id: taskId,
         projectId,
       }
+    }).catch((err) => {
+      if(err.code === 'P2003') throw new NotFoundException('Task not found');
+      throw err;
     })
   }
 
@@ -100,7 +105,7 @@ export class TaskService {
       },
       data: taskAttr
     }).catch((err) => {
-      if(err.code === 'P2003') throw new NotFoundException('user not found');
+      if(err.code === 'P2003') throw new NotFoundException('User not found');
       throw err;
     })
   }

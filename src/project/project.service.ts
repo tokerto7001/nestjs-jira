@@ -16,6 +16,7 @@ export class ProjectService {
       }
     }).catch((err) => {
       if(err.code === 'P2003') throw new NotFoundException('Workspace not found');
+      if(err.code === 'P2002') throw new NotFoundException('Project name already exists');
       throw err;
     })
   }
@@ -57,7 +58,11 @@ export class ProjectService {
       data: {
         ...projectAttr
       }
-    });
+    }).catch((err) => {
+      if(err.code === 'P2003') throw new NotFoundException('Project not found');
+      if(err.code === 'P2002') throw new NotFoundException('Project name already exists');
+      throw err;
+    })
   }
 
   updateMemberRole(projectId: number, userId: number, role: WorkSpaceRole) {
