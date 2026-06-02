@@ -6,6 +6,9 @@ import { UserModule } from './user/user.module';
 import { PrismaModule } from './prisma.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 import { ProjectModule } from './project/project.module';
+import { TaskService } from './task/task.service';
+import { TaskController } from './task/task.controller';
+import { TaskModule } from './task/task.module';
 
 @Module({
   imports: [
@@ -13,9 +16,10 @@ import { ProjectModule } from './project/project.module';
     UserModule,
     PrismaModule,
     WorkspaceModule,
-    ProjectModule
+    ProjectModule,
+    TaskModule
   ],
-  controllers: [AppController],
-  providers: [AppService,],
+  controllers: [AppController, TaskController],
+  providers: [AppService, TaskService,],
 })
 export class AppModule {}

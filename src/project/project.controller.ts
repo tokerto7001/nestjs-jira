@@ -3,11 +3,11 @@ import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dtos/create-project.dto';
 import { AuthGuard } from '../guards/auth.guard';
 import { AddToProjectDto } from './dtos/add-to-project.dto';
-import { ProjectAdminGuard } from './guards/project-admin.guard';
+import { ProjectAdminGuard } from '../guards/project-admin.guard';
 import { WorkspaceAdminGuard } from '../guards/workspace-admin.guard';
 import { UpdateProjectDto } from './dtos/update-project.dto';
 import { UpdateRoleDto } from './dtos/update-role.dto';
-import { ProjectMemberGuard } from './guards/project-member.guard';
+import { ProjectMemberGuard } from '../guards/project-member.guard';
 import type { Request } from 'express';
 import { RemoveFromProjectDto } from './dtos/remove-from-project.dto';
 
